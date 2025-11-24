@@ -4,7 +4,8 @@ import {
   Image, 
   Type,
   FileJson,
-  Terminal
+  Terminal,
+  MapPin
 } from 'lucide-react';
 import { ToolConfig } from '../types';
 
@@ -32,6 +33,14 @@ export const tools: ToolConfig[] = [
     path: '/tools/regex',
     icon: Terminal,
     category: 'Development'
+  },
+  {
+    id: 'ip',
+    name: 'IP 查询 & 地图',
+    description: '查询 IP 归属地、ISP 信息并进行地图定位。',
+    path: '/tools/ip',
+    icon: MapPin,
+    category: 'Utility'
   },
   // Placeholders for roadmap
   {

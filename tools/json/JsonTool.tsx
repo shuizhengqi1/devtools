@@ -9,11 +9,14 @@ import {
   FileCode, 
   AlignLeft,
   Split,
-  Wrench
+  Wrench,
+  ArrowLeftRight,
+  Hash
 } from 'lucide-react';
 import { JsonTree } from './JsonTree';
+import { JsonDiff } from './JsonDiff';
 
-type ViewMode = 'split' | 'code' | 'tree';
+type ViewMode = 'split' | 'code' | 'tree' | 'diff';
 
 const DEFAULT_JSON = '{\n  "welcome": "欢迎使用 DevToolbox Pro",\n  "features": [\n    "强大的 JSON 编辑器",\n    "实时时间戳转换",\n    "正则测试工具"\n  ],\n  "tips": "尝试点击左侧的格式化按钮！"\n}';
 
@@ -56,6 +59,18 @@ export const JsonTool: React.FC = () => {
       setParsedData(null);
     }
   }, [input]);
+
+  // Computed info label
+  const getInfoLabel = () => {
+    if (!parsedData) return null;
+    if (Array.isArray(parsedData)) {
+      return `Array(${parsedData.length})`;
+    }
+    if (typeof parsedData === 'object' && parsedData !== null) {
+      return `Object{${Object.keys(parsedData).length}}`;
+    }
+    return typeof parsedData;
+  };
 
   const formatJson = () => {
     if (parsedData) {
@@ -100,12 +115,26 @@ export const JsonTool: React.FC = () => {
     }
   };
 
+  if (viewMode === 'diff') {
+    return (
+      <div className="h-[calc(100vh-8rem)]">
+        <JsonDiff 
+          initialLeft={input}
+          initialRight=""
+          onClose={() => setViewMode('split')} 
+        />
+      </div>
+    );
+  }
+
+  const infoLabel = getInfoLabel();
+
   return (
     <div className="h-[calc(100vh-8rem)] flex flex-col gap-4">
       {/* Toolbar */}
       <div className="flex flex-col md:flex-row justify-between items-center gap-4 bg-white dark:bg-slate-900 p-4 rounded-xl shadow-sm ring-1 ring-slate-200 dark:ring-slate-800">
-        <div className="flex items-center space-x-2 w-full md:w-auto">
-          <div className="flex bg-slate-100 dark:bg-slate-800 rounded-lg p-1">
+        <div className="flex items-center space-x-2 w-full md:w-auto overflow-x-auto">
+          <div className="flex bg-slate-100 dark:bg-slate-800 rounded-lg p-1 shrink-0">
             <button 
               onClick={() => setViewMode('split')}
               className={`p-2 rounded-md transition-all ${viewMode === 'split' ? 'bg-white dark:bg-slate-700 shadow-sm text-blue-600 dark:text-blue-400' : 'text-slate-500'}`}
@@ -129,27 +158,31 @@ export const JsonTool: React.FC = () => {
             </button>
           </div>
           
-          <div className="h-8 w-[1px] bg-slate-200 dark:bg-slate-700 mx-2" />
+          <div className="h-8 w-[1px] bg-slate-200 dark:bg-slate-700 mx-2 shrink-0" />
 
-          <button onClick={formatJson} disabled={!!error} className="btn-secondary text-xs flex items-center px-3 py-2 rounded-lg bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 disabled:opacity-50 font-medium">
+          <button onClick={formatJson} disabled={!!error} className="btn-secondary text-xs flex items-center px-3 py-2 rounded-lg bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 disabled:opacity-50 font-medium whitespace-nowrap">
             <Maximize2 className="w-3 h-3 mr-2" /> 格式化
           </button>
-          <button onClick={minifyJson} disabled={!!error} className="btn-secondary text-xs flex items-center px-3 py-2 rounded-lg bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 disabled:opacity-50 font-medium">
+          <button onClick={minifyJson} disabled={!!error} className="btn-secondary text-xs flex items-center px-3 py-2 rounded-lg bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 disabled:opacity-50 font-medium whitespace-nowrap">
             <Minimize2 className="w-3 h-3 mr-2" /> 压缩
+          </button>
+          
+          <button onClick={() => setViewMode('diff')} className="btn-secondary text-xs flex items-center px-3 py-2 rounded-lg bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 font-medium whitespace-nowrap">
+            <ArrowLeftRight className="w-3 h-3 mr-2" /> 对比
           </button>
         </div>
 
-        <div className="flex items-center space-x-2 w-full md:w-auto">
+        <div className="flex items-center space-x-2 w-full md:w-auto overflow-x-auto">
            {error && (
-             <button onClick={tryRepair} className="text-xs px-3 py-2 bg-yellow-100 text-yellow-800 dark:bg-yellow-900/30 dark:text-yellow-200 rounded-lg font-medium hover:bg-yellow-200 transition-colors flex items-center">
+             <button onClick={tryRepair} className="text-xs px-3 py-2 bg-yellow-100 text-yellow-800 dark:bg-yellow-900/30 dark:text-yellow-200 rounded-lg font-medium hover:bg-yellow-200 transition-colors flex items-center whitespace-nowrap">
                <Wrench className="w-3 h-3 mr-2" /> 自动修复
              </button>
            )}
-           <button onClick={copyToClipboard} className="flex items-center px-3 py-2 text-xs font-medium text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-lg transition-colors">
+           <button onClick={copyToClipboard} className="flex items-center px-3 py-2 text-xs font-medium text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-lg transition-colors whitespace-nowrap">
              {isCopied ? <Check className="w-3 h-3 mr-2 text-green-500" /> : <Copy className="w-3 h-3 mr-2" />}
              {isCopied ? '已复制' : '复制'}
            </button>
-           <button onClick={clearAll} className="flex items-center px-3 py-2 text-xs font-medium text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-lg transition-colors">
+           <button onClick={clearAll} className="flex items-center px-3 py-2 text-xs font-medium text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-lg transition-colors whitespace-nowrap">
              <Trash2 className="w-3 h-3 mr-2" />
              清空
            </button>
@@ -162,7 +195,15 @@ export const JsonTool: React.FC = () => {
         {(viewMode === 'split' || viewMode === 'code') && (
           <div className={`flex-1 flex flex-col relative bg-white dark:bg-slate-900 rounded-xl ring-1 ring-slate-200 dark:ring-slate-800 shadow-sm overflow-hidden ${viewMode === 'split' ? 'lg:w-1/2' : 'w-full'}`}>
             <div className="absolute top-0 left-0 right-0 h-8 bg-slate-50 dark:bg-slate-800/50 border-b border-slate-100 dark:border-slate-800 flex items-center px-4 justify-between">
-              <span className="text-xs font-medium text-slate-500 uppercase tracking-wider">JSON 输入</span>
+              <div className="flex items-center gap-2">
+                <span className="text-xs font-medium text-slate-500 uppercase tracking-wider">JSON 输入</span>
+                {infoLabel && !error && (
+                   <span className="text-[10px] bg-blue-100 text-blue-700 dark:bg-blue-900/40 dark:text-blue-300 px-1.5 py-0.5 rounded-full font-mono flex items-center">
+                     <Hash className="w-3 h-3 mr-1" />
+                     {infoLabel}
+                   </span>
+                )}
+              </div>
               {error && <span className="text-xs text-red-500 flex items-center"><AlertCircle className="w-3 h-3 mr-1" /> 格式错误</span>}
             </div>
             <textarea

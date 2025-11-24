@@ -3,6 +3,7 @@ import { Layout } from './components/Layout';
 import { JsonTool } from './tools/json/JsonTool';
 import { TimestampTool } from './tools/timestamp/TimestampTool';
 import { RegexTool } from './tools/regex/RegexTool';
+import { IpTool } from './tools/ip/IpTool';
 import { Home } from './pages/Home';
 import { CommandPalette } from './components/CommandPalette';
 import { ThemeMode } from './types';
@@ -40,6 +41,7 @@ const App: React.FC = () => {
     if (currentPath.startsWith('/tools/json')) return <JsonTool />;
     if (currentPath.startsWith('/tools/timestamp')) return <TimestampTool />;
     if (currentPath.startsWith('/tools/regex')) return <RegexTool />;
+    if (currentPath.startsWith('/tools/ip')) return <IpTool />;
     return <Home />;
   };
 

@@ -1,5 +1,5 @@
-import React, { useState } from 'react';
-import { ChevronRight, ChevronDown, Copy } from 'lucide-react';
+import React, { useState, useEffect } from 'react';
+import { ChevronRight, ChevronDown } from 'lucide-react';
 
 interface JsonTreeProps {
   data: any;
@@ -32,12 +32,20 @@ const JsonNode: React.FC<{
   initiallyExpanded: boolean,
   filter: string
 }> = ({ name, value, isLast, level, initiallyExpanded, filter }) => {
+  // 1. Declare State
   const [isExpanded, setIsExpanded] = useState(initiallyExpanded || (level < 2));
+  
+  // 2. Declare Side Effects (Effects must always be called unconditionally)
+  useEffect(() => {
+    if (filter) setIsExpanded(true);
+  }, [filter]);
+
+  // 3. Computed Values
   const type = getType(value);
   const isObject = type === 'object' || type === 'array';
   const isEmpty = isObject && Object.keys(value).length === 0;
 
-  // Filter Logic: Check if this node or its children match
+  // 4. Helper Functions
   const matchesFilter = (val: any, key: string | null): boolean => {
     if (!filter) return true;
     const lowerFilter = filter.toLowerCase();
@@ -51,12 +59,8 @@ const JsonNode: React.FC<{
     return false;
   };
 
+  // 5. Conditional Return (Must be AFTER all hooks)
   if (!matchesFilter(value, name)) return null;
-
-  // Auto-expand if filtering
-  React.useEffect(() => {
-    if (filter) setIsExpanded(true);
-  }, [filter]);
 
   const handleToggle = (e: React.MouseEvent) => {
     e.stopPropagation();

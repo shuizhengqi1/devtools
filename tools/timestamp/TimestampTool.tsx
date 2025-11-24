@@ -30,8 +30,9 @@ export const TimestampTool: React.FC = () => {
 
   // Converter Logic
   useEffect(() => {
+    // If input is empty, default to NOW
     if (!inputVal.trim()) {
-      setConvertedDate(null);
+      setConvertedDate(now);
       return;
     }
 
@@ -55,7 +56,7 @@ export const TimestampTool: React.FC = () => {
     } else {
       setConvertedDate(null);
     }
-  }, [inputVal]);
+  }, [inputVal, now]); // Add 'now' to dependency so it updates live when input is empty
 
   const formatResult = (date: Date, zone?: string) => {
     try {
@@ -126,13 +127,13 @@ export const TimestampTool: React.FC = () => {
                   type="text"
                   value={inputVal}
                   onChange={(e) => setInputVal(e.target.value)}
-                  placeholder={`例如：${Math.floor(Date.now() / 1000)} 或 2023-10-27`}
+                  placeholder="留空显示当前时间，或输入 1698400000"
                   className="flex-1 block w-full rounded-lg border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-950 text-slate-900 dark:text-slate-100 focus:border-blue-500 focus:ring-blue-500 sm:text-sm p-2.5 border"
                 />
                 <button 
                   onClick={() => setInputVal('')}
                   className="px-3 py-2 bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400 rounded-lg hover:bg-slate-200 dark:hover:bg-slate-700"
-                  title="重置"
+                  title="重置为当前时间"
                 >
                   <RotateCcw className="w-4 h-4" />
                 </button>
